@@ -1,0 +1,110 @@
+substitutions:
+  devicename: czujnik_jakości_powietrza
+  friendly_name: Czujnik powietrza
+
+
+esphome:
+  name: czujnik_powietrza
+  platform: ESP8266
+  board: nodemcuv2
+
+wifi:
+  ssid: "focza"
+  password: "Foczowyinternet123"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Czujnik Powietrza"
+    password: "itIYnDWcNiU2"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "LCtoor320"
+
+ota:
+  password: "LCtoor320"
+
+i2c:
+  sda: D2
+  scl: D1
+
+sensor:
+  - platform: ccs811
+    eco2:
+      name: "Stężenie eCO2"
+    tvoc:
+      name: "Stężenie tVOC"
+    baseline: 0xE482
+    address: 0x5A
+    update_interval: 1s
+    temperature: dht_temp
+    humidity: dht_humi
+
+  - platform: pmsx003
+    type: PMSX003
+    pm_1_0:
+      name: "Stężenie PM1"
+    pm_2_5:
+      name: "Stężenie PM2.5"
+      id: pm25
+      filters:
+        lambda: |-
+          static float red, green;
+          if(x >= 75){
+            red = 1.0;
+            green = 0;
+          } else {
+            red = 0.25 + (float)x/112.5;
+            green = (0.5 - (float)x/150.0);
+          }
+          auto call = id(ws2812b).turn_on();
+          call.set_rgb(red, green, 0);
+          call.perform();
+          return x;
+
+    pm_10_0:
+      name: "Stężenie PM10"
+
+  - platform: dht
+    pin: D6
+    model: AM2302
+    temperature:
+      name: "Temperatura"
+      id: dht_temp
+    humidity:
+      name: "Wilgotność"
+      id: dht_humi
+    update_interval: 5s
+
+  - platform: wifi_signal
+    name: ${friendly_name} siła sygnału WiFi
+    update_interval: 60s
+  - platform: uptime
+    name: ${friendly_name} Uptime
+    filters:
+      - lambda: return x / 60.0;
+    unit_of_measurement: minut
+
+uart:
+  rx_pin: D4
+  tx_pin: D3
+  baud_rate: 9600
+
+light:
+  - platform: neopixelbus
+    variant: WS2812X
+    type: GRB
+    pin: GPIO3
+    method: ESP8266_DMA
+    num_leds: 8
+    name: "Kolor stanu powietrza"
+    id: ws2812b
+
+switch:
+  - platform: restart
+    name: ${friendly_name} Restart
