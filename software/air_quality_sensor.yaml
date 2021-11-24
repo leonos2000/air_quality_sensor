@@ -10,12 +10,12 @@ esphome:
 
 wifi:
   ssid: "focza"
-  password: "Foczowyinternet123"
+  password: "password"
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Czujnik Powietrza"
-    password: "itIYnDWcNiU2"
+    password: "password"
 
 captive_portal:
 
@@ -24,10 +24,10 @@ logger:
 
 # Enable Home Assistant API
 api:
-  password: "LCtoor320"
+  password: "password"
 
 ota:
-  password: "LCtoor320"
+  password: "password"
 
 i2c:
   sda: D2
